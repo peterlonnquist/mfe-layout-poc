@@ -1,4 +1,5 @@
-import { Injectable, computed, inject, resource } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { Injectable, computed, inject } from '@angular/core';
 import { AKTUELL_APP, AppLank } from './app-lank';
 
 export type Menypost = AppLank & { etikett: string };
@@ -13,13 +14,8 @@ type Meny = { poster: Menypost[] };
 export class MenyService {
   private readonly aktuellApp = inject(AKTUELL_APP);
 
-  private readonly meny = resource({
-    loader: async ({ abortSignal }) => {
-      const svar = await fetch('/bff/api/1.0/meny', { signal: abortSignal, cache: 'no-cache' });
-      if (!svar.ok) throw new Error(`meny svarade ${svar.status}`);
-      return (await svar.json()) as Meny;
-    },
-  });
+  // Går via HttpClient, så interceptorer (t.ex. auth) gäller även menyn.
+  private readonly meny = httpResource<Meny>(() => ({ url: '/bff/api/1.0/meny', cache: 'no-cache' }));
 
   /** Om menyn inte kan hämtas visas bara länken hem, så att användaren inte blir strandsatt. */
   readonly poster = computed<Menypost[]>(() =>
