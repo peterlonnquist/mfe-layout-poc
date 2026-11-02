@@ -1,0 +1,21 @@
+# ${APP_BAS} ersätts vid containerstart av nginx-imagens envsubst.
+server {
+  listen 80;
+  root /usr/share/nginx/html;
+
+  # Hashade bundles kan cachas hårt.
+  location ~* \.(js|css|woff2?)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+  }
+
+  # index.html och meny.json får aldrig cachas, annars syns en ny deploy inte.
+  location ~* (index\.html|meny\.json)$ {
+    add_header Cache-Control "no-cache" always;
+  }
+
+  # SPA-fallback: alla okända sökvägar under appens bas ger appens index.html.
+  location ${APP_BAS} {
+    add_header Cache-Control "no-cache" always;
+    try_files $uri ${APP_BAS}index.html;
+  }
+}

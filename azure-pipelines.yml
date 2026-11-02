@@ -1,0 +1,67 @@
+# Bygger bara det som påverkats av ändringen och deployar varje påverkad app för sig.
+#   Ändring i apps/arenden          -> bara arenden byggs och deployas.
+#   Ändring i libs/delat/layout/**  -> ALLA appar byggs och deployas (layouten är inbyggd i varje app).
+#   Ändring i apps/start/public/meny.json -> bara start (menyn läses vid runtime).
+trigger:
+  branches: { include: [main] }
+pr:
+  branches: { include: [main] }
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    NX_BASE: origin/main
+  ${{ else }}:
+    NX_BASE: HEAD~1
+
+stages:
+  - stage: Bygg
+    jobs:
+      - job: Bygg
+        steps:
+          - checkout: self
+            fetchDepth: 0
+          - task: NodeTool@0
+            inputs: { versionSpec: '22.x' }
+          - script: npm ci
+            displayName: Installera beroenden
+          - script: npx nx affected -t build --base=$(NX_BASE) --head=HEAD
+            displayName: Bygg påverkade projekt
+          - script: |
+              APPAR=$(npx nx show projects --affected --type app --base=$(NX_BASE) --head=HEAD --json)
+              # Konvention: start ligger på /, övriga på /<app>/ (samma som appBas() i layoutbiblioteket)
+              MATRIS=$(node -e '
+                const a = JSON.parse(process.argv[1]);
+                console.log(JSON.stringify(Object.fromEntries(a.map(x => [x, { APP: x, BAS: x === "start" ? "/" : `/${x}/` }]))));
+              ' "$APPAR")
+              echo "Påverkade appar: $APPAR"
+              echo "##vso[task.setvariable variable=matris;isOutput=true]$MATRIS"
+            name: paverkade
+            displayName: Räkna ut påverkade appar
+          - publish: dist/apps
+            artifact: appar
+            condition: and(succeeded(), ne(variables['paverkade.matris'], '{}'))
+
+  - stage: Deploy
+    dependsOn: Bygg
+    condition: |
+      and(succeeded(),
+          ne(variables['Build.Reason'], 'PullRequest'),
+          ne(dependencies.Bygg.outputs['Bygg.paverkade.matris'], '{}'))
+    jobs:
+      - job: Deploya
+        strategy:
+          # En jobbinstans per påverkad app -> oberoende deploy
+          matrix: $[ stageDependencies.Bygg.Bygg.outputs['paverkade.matris'] ]
+        steps:
+          - checkout: self
+          - download: current
+            artifact: appar
+          - script: |
+              mkdir -p dist/apps && cp -r $(Pipeline.Workspace)/appar/$(APP) dist/apps/
+              echo "Deployar $(APP) på $(BAS)"
+              # Container:   docker build -f deploy/app/Dockerfile --build-arg APP=$(APP) --build-arg BAS=$(BAS) -t <acr>/$(APP):$(Build.BuildId) . && docker push ...
+              # Statiskt:    az storage blob upload-batch -s dist/apps/$(APP)/browser -d '$web$(BAS)' --overwrite
+            displayName: Deploya $(APP)

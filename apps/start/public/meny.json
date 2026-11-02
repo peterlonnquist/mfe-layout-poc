@@ -1,0 +1,8 @@
+{
+  "poster": [
+    { "etikett": "Start", "app": "start", "sokvag": "" },
+    { "etikett": "Ärenden", "app": "arenden", "sokvag": "" },
+    { "etikett": "Nya ärenden", "app": "arenden", "sokvag": "nya" },
+    { "etikett": "Rapporter", "app": "rapporter", "sokvag": "" }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "name": "arenden",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/arenden/src",
+  "tags": [
+    "typ:app",
+    "doman:arenden"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/arenden",
+        "browser": "apps/arenden/src/main.ts",
+        "tsConfig": "apps/arenden/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/arenden/public"
+          }
+        ],
+        "styles": [
+          "apps/arenden/src/styles.scss"
+        ],
+        "baseHref": "/arenden/"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "10kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
+      "configurations": {
+        "production": {
+          "buildTarget": "arenden:build:production"
+        },
+        "development": {
+          "buildTarget": "arenden:build:development"
+        }
+      },
+      "options": {
+        "port": 4201
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": [
+        "build"
+      ],
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "arenden:build",
+        "staticFilePath": "dist/apps/arenden/browser",
+        "spa": true
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+:host { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.hoppa { position: absolute; left: -999px; }
+.hoppa:focus { left: 1rem; top: 0.5rem; background: #fff; padding: 0.4rem 0.8rem; z-index: 10; }
+
+/* view-transition-name: sidhuvud och meny står still vid appbyte, bara innehållet tonas. */
+.sidhuvud {
+  view-transition-name: sidhuvud;
+  display: flex; align-items: center; gap: 1.5rem; padding: 0.75rem 1.5rem;
+  background: var(--farg-profil); color: #fff; border-bottom: 3px solid var(--farg-accent);
+}
+.varumarke { color: #fff; text-decoration: none; font-weight: 700; font-size: 1.2rem; margin-right: auto; }
+.enhet { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+.enhet select { font: inherit; padding: 0.25rem 0.5rem; border-radius: var(--radie); border: 0; }
+.anvandare { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; }
+.initialer { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--farg-accent); font-weight: 700; font-size: 0.8rem; }
+
+.ram { display: grid; grid-template-columns: 14rem 1fr; }
+.meny { view-transition-name: meny; background: var(--farg-panel); border-right: 1px solid var(--farg-linje); padding: 1rem 0; }
+.meny ul { list-style: none; margin: 0; padding: 0; }
+.meny a { display: block; padding: 0.55rem 1.5rem; color: var(--farg-text); text-decoration: none; border-left: 3px solid transparent; }
+.meny a:hover { background: var(--farg-yta); }
+.meny a.aktiv { border-left-color: var(--farg-accent); background: var(--farg-profil-ljus); color: var(--farg-profil); font-weight: 600; }
+.menyfel { margin: 1rem 1.5rem; font-size: 0.85rem; color: var(--farg-fel); }
+main { padding: 2rem; max-width: 64rem; }
+main:focus { outline: none; }
+
+@media (max-width: 720px) {
+  .sidhuvud { flex-wrap: wrap; gap: 0.75rem; }
+  .anvandare { display: none; }
+  .ram { grid-template-columns: 1fr; }
+  .meny { border-right: 0; border-bottom: 1px solid var(--farg-linje); padding: 0; }
+  .meny ul { display: flex; overflow-x: auto; }
+  .meny a { border-left: 0; border-bottom: 3px solid transparent; padding: 0.7rem 1rem; white-space: nowrap; }
+  .meny a.aktiv { border-bottom-color: var(--farg-accent); }
+  main { padding: 1.25rem; }
+}

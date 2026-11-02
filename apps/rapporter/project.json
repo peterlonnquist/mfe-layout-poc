@@ -1,0 +1,92 @@
+{
+  "name": "rapporter",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/rapporter/src",
+  "tags": [
+    "typ:app",
+    "doman:rapporter"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/rapporter",
+        "browser": "apps/rapporter/src/main.ts",
+        "tsConfig": "apps/rapporter/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/rapporter/public"
+          }
+        ],
+        "styles": [
+          "apps/rapporter/src/styles.scss"
+        ],
+        "baseHref": "/rapporter/"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "10kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
+      "configurations": {
+        "production": {
+          "buildTarget": "rapporter:build:production"
+        },
+        "development": {
+          "buildTarget": "rapporter:build:development"
+        }
+      },
+      "options": {
+        "port": 4202
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": [
+        "build"
+      ],
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "rapporter:build",
+        "staticFilePath": "dist/apps/rapporter/browser",
+        "spa": true
+      }
+    }
+  }
+}
