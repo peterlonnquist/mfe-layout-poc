@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { MfeLank } from './app-lank';
+import { AKTUELL_APP, AppLank, appUrl } from './app-lank';
 import { MenyService } from './meny.service';
 import { ENHETER, SessionService } from './session.service';
 
@@ -13,11 +13,17 @@ import { ENHETER, SessionService } from './session.service';
  */
 @Component({
   selector: 'mfe-sidlayout',
-  imports: [MfeLank],
+  imports: [RouterLink],
+  // Länkar inom den egna appen går via routern (ingen sidladdning),
+  // länkar till andra appar är vanliga länkar som laddar den appen.
   template: `
     <a class="hoppa" href="#innehall">Hoppa till innehåll</a>
     <header class="sidhuvud">
-      <a class="varumarke" [mfeLank]="{ app: 'start' }">Verksamhetsportal</a>
+      @if (arIntern(start)) {
+        <a class="varumarke" routerLink="/">Verksamhetsportal</a>
+      } @else {
+        <a class="varumarke" [href]="appUrl(start)">Verksamhetsportal</a>
+      }
       <label class="enhet">
         <span>Enhet</span>
         <select (change)="session.valjEnhet($any($event.target).value)">
@@ -37,9 +43,13 @@ import { ENHETER, SessionService } from './session.service';
         <ul>
           @for (post of meny.poster(); track post.app + post.sokvag) {
             <li>
-              <a [mfeLank]="post" [class.aktiv]="post === aktiv()" [attr.aria-current]="post === aktiv() ? 'page' : null">
-                {{ post.etikett }}
-              </a>
+              @if (arIntern(post)) {
+                <a [routerLink]="'/' + (post.sokvag ?? '')" [class.aktiv]="post === aktiv()" [attr.aria-current]="post === aktiv() ? 'page' : null">
+                  {{ post.etikett }}
+                </a>
+              } @else {
+                <a [href]="appUrl(post)">{{ post.etikett }}</a>
+              }
             </li>
           }
         </ul>
@@ -56,6 +66,11 @@ export class Sidlayout {
   protected readonly session = inject(SessionService);
   protected readonly meny = inject(MenyService);
   protected readonly enheter = ENHETER;
+  protected readonly start: AppLank = { app: 'start' };
+  protected readonly appUrl = appUrl;
+
+  private readonly aktuellApp = inject(AKTUELL_APP);
+  protected readonly arIntern = (lank: AppLank) => lank.app === this.aktuellApp;
 
   private readonly router = inject(Router);
   private readonly url = toSignal(

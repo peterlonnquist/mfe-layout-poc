@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { MfeLank, SessionService } from '@mfe-layout-poc/delat/layout';
+import { SessionService, appUrl } from '@mfe-layout-poc/delat/layout';
 
 type Manadsvarde = { manad: string; inkomna: number; avslutade: number };
 
@@ -26,12 +26,11 @@ const STATISTIK: Record<string, Manadsvarde[]> = {
 
 @Component({
   selector: 'rapporter-oversikt',
-  imports: [MfeLank],
   template: `
     <h1>Rapporter</h1>
     <p class="ingress">
       Inkomna och avslutade ärenden per månad, {{ session.valdEnhet().namn }}.
-      <a [mfeLank]="{ app: 'arenden', sokvag: 'nya' }">Visa nya ärenden</a>
+      <a [href]="appUrl({ app: 'arenden', sokvag: 'nya' })">Visa nya ärenden</a>
     </p>
 
     <section class="diagram" aria-label="Ärenden per månad">
@@ -59,6 +58,7 @@ const STATISTIK: Record<string, Manadsvarde[]> = {
 })
 export class RapportOversikt {
   protected readonly session = inject(SessionService);
+  protected readonly appUrl = appUrl;
   protected readonly statistik = computed(() => STATISTIK[this.session.valdEnhet().kod] ?? []);
   protected readonly max = computed(() =>
     Math.max(1, ...this.statistik().flatMap((r) => [r.inkomna, r.avslutade])),

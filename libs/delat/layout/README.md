@@ -1,6 +1,6 @@
 # delat-layout
 
-Gemensam sidram för alla appar: sidhuvud, meny, enhetsväljare, `mfeLank`-direktivet och designtokens.
+Gemensam sidram för alla appar: sidhuvud, meny, enhetsväljare, `appUrl()` för länkar mellan appar och designtokens.
 
 ```ts
 // app.config.ts

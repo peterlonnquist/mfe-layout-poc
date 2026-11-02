@@ -1,16 +1,16 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MfeLank, SessionService } from '@mfe-layout-poc/delat/layout';
+import { SessionService, appUrl } from '@mfe-layout-poc/delat/layout';
 import { ARENDEN, ArendeStatus } from './arenden.data';
 
 @Component({
   selector: 'arenden-lista',
-  imports: [RouterLink, MfeLank],
+  imports: [RouterLink],
   template: `
     <h1>{{ endastStatus() ? 'Nya ärenden' : 'Ärenden' }}</h1>
     <p class="ingress">
       {{ arenden().length }} ärenden för {{ session.valdEnhet().namn }}.
-      <a [mfeLank]="{ app: 'rapporter' }">Se statistik i Rapporter</a>
+      <a [href]="appUrl({ app: 'rapporter' })">Se statistik i Rapporter</a>
     </p>
 
     @if (arenden().length === 0) {
@@ -51,6 +51,7 @@ export class ArendeLista {
   readonly endastStatus = input<ArendeStatus>();
 
   protected readonly session = inject(SessionService);
+  protected readonly appUrl = appUrl;
   protected readonly arenden = computed(() =>
     ARENDEN.filter((a) => a.enhet === this.session.valdEnhet().kod).filter(
       (a) => !this.endastStatus() || a.status === this.endastStatus(),

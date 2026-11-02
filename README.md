@@ -14,7 +14,7 @@ apps/
   rapporter/    Fristående app på /rapporter/                                      :4202
 libs/delat/layout/
   sidlayout     <mfe-sidlayout> – sidhuvud, meny, innehållsyta
-  app-lank      mfeLank-direktivet: intern eller extern navigering
+  app-lank      appUrl(): adress till en annan app enligt sökvägskonventionen
   meny.service  Läser menyns innehåll från /bff/api/1.0/meny vid runtime
   session       Vald enhet, sparad i localStorage
   stil/         Designtokens + cross-document view transitions
@@ -56,16 +56,17 @@ providers: [provideRouter(appRoutes), provideSidlayout('arenden')]
 template: `<mfe-sidlayout><router-outlet /></mfe-sidlayout>`
 ```
 
-**`mfeLank`** avgör hur en länk ska navigera:
+**Länkar** är vanliga Angular-länkar:
 
 ```html
-<a [mfeLank]="{ app: 'arenden', sokvag: 'A-1041' }">A-1041</a>
+<!-- Inom den egna appen: routern, utan sidladdning -->
+<a [routerLink]="['/', arende.id]">{{ arende.id }}</a>
+
+<!-- Till en annan app: vanlig länk, webbläsaren laddar den appen -->
+<a [href]="appUrl({ app: 'arenden', sokvag: 'A-1041' })">A-1041</a>
 ```
 
-- Målet ligger i samma app: klientnavigering via routern, utan sidladdning.
-- Målet ligger i en annan app: vanlig länk, webbläsaren laddar den appen.
-
-`href` är alltid den fullständiga adressen. Mittenklick, ctrl/cmd-klick och "öppna i ny flik" fungerar därför i båda fallen. Inom en app går det lika bra att använda vanlig `routerLink`.
+`appUrl()` bygger adressen enligt sökvägskonventionen. Menyn i sidlayouten väljer `routerLink` eller `href` beroende på om menyposten hör till den aktuella appen.
 
 **Menyn** hämtas från `/bff/api/1.0/meny` vid runtime. Den serveras av `backend-for-frontend`, en liten Node-tjänst utan beroenden som läser `apps/backend-for-frontend/meny.json`. Biblioteket äger bara utseende och logik. En ny menypost kräver alltså bara en deploy av `backend-for-frontend`, inte av alla appar. Den aktiva posten är den med längst matchande sökväg i aktuell app. `/arenden/nya` markerar därför "Nya ärenden" och inte "Ärenden".
 
@@ -108,7 +109,7 @@ Varje app kan deployas som egen container (`deploy/app/Dockerfile`) eller som st
 ## Regler som håller isär teamen
 
 1. **Sökvägskonventionen är kontraktet.** `start` på `/`, alla andra på `/<appnamn>/`. Den finns på fyra ställen som måste hållas i synk: `appBas()`, gatewayn, dev-gatewayn och `baseHref`.
-2. **Länka till andra appar med `mfeLank`**, aldrig med hårdkodade `href`.
+2. **Länka till andra appar med `appUrl()`**, aldrig med hårdkodade `href`.
 3. **Layoutändringar ska vara bakåtkompatibla.** Så länge alla appar inte har deployats om visas olika versioner av headern i olika appar.
 4. **`index.html` och menyn får aldrig cachas.** Se `deploy/app/default.conf.template` och `apps/backend-for-frontend/server.mjs`.
 5. **Delat tillstånd som måste överleva ett appbyte** ska ligga i URL, cookie, `localStorage` eller backend, aldrig bara i minnet.
