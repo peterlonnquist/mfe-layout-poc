@@ -70,7 +70,8 @@
         }
       },
       "options": {
-        "port": 4202
+        "port": 4202,
+        "proxyConfig": "apps/rapporter/proxy.conf.json"
       }
     },
     "serve-static": {

@@ -8,8 +8,8 @@ server {
     add_header Cache-Control "public, max-age=31536000, immutable" always;
   }
 
-  # index.html och meny.json får aldrig cachas, annars syns en ny deploy inte.
-  location ~* (index\.html|meny\.json)$ {
+  # index.html får aldrig cachas, annars syns en ny deploy inte.
+  location ~* index\.html$ {
     add_header Cache-Control "no-cache" always;
   }
 

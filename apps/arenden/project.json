@@ -70,7 +70,8 @@
         }
       },
       "options": {
-        "port": 4201
+        "port": 4201,
+        "proxyConfig": "apps/arenden/proxy.conf.json"
       }
     },
     "serve-static": {

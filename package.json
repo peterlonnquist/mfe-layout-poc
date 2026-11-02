@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx run-many -t serve -p start arenden rapporter --parallel=3",
-    "start:arenden": "nx serve arenden",
-    "start:rapporter": "nx serve rapporter",
+    "start": "nx run-many -t serve -p backend-for-frontend start arenden rapporter --parallel=4",
+    "start:arenden": "nx run-many -t serve -p backend-for-frontend arenden",
+    "start:rapporter": "nx run-many -t serve -p backend-for-frontend rapporter",
+    "start:bff": "nx serve backend-for-frontend",
     "build": "nx run-many -t build",
     "build:affected": "nx affected -t build",
     "affected:appar": "nx show projects --affected --type app"

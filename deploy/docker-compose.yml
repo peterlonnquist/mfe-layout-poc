@@ -11,7 +11,9 @@ services:
       - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./gateway/otillganglig.html:/usr/share/nginx/html/_gateway/otillganglig.html:ro
     ports: ['8080:80']
-    depends_on: [start, arenden, rapporter]
+    depends_on: [backend-for-frontend, start, arenden, rapporter]
+  backend-for-frontend:
+    build: { context: .., dockerfile: deploy/backend-for-frontend/Dockerfile }
   start:
     <<: *app
     build: { <<: *bygg, args: { APP: start, BAS: / } }
