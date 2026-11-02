@@ -8,20 +8,22 @@ Versioner: Nx 24.0, Angular 22.2.
 
 ```
 apps/
-  backend-for-frontend/  Node-tjänst, serverar GET /meny                     :4300
-  start/        Startsida på /. Dev-proxy till övriga.                             :4200
+  backend-for-frontend/  Node-tjänst, API under /bff/api/1.0/              :4300
+  start/        Startsida på /                                                     :4200
   arenden/      Fristående app på /arenden/                                        :4201
   rapporter/    Fristående app på /rapporter/                                      :4202
 libs/delat/layout/
   sidlayout     <mfe-sidlayout> – sidhuvud, meny, innehållsyta
   app-lank      mfeLank-direktivet: intern eller extern navigering
-  meny.service  Läser menyns innehåll från /meny vid runtime
+  meny.service  Läser menyns innehåll från /bff/api/1.0/meny vid runtime
   session       Vald enhet, sparad i localStorage
   stil/         Designtokens + cross-document view transitions
 deploy/
   app/          Generisk Dockerfile + nginx-mall per app
   backend-for-frontend/  Dockerfile för Node-tjänsten
   gateway/      nginx som routar sökväg -> app, plus felsida
+tools/
+  dev-gateway/  Lokal gateway på :4000, samma routing som deploy/gateway
 azure-pipelines.yml
 ```
 
@@ -29,11 +31,11 @@ azure-pipelines.yml
 
 ```bash
 npm install
-npm start                 # alla appar + backend-for-frontend, öppna http://localhost:4200
-npm run start:arenden     # en app fristående (med backend-for-frontend): http://localhost:4201/arenden/
+npm start                 # allt, öppna http://localhost:4000
+npm run start:arenden     # bara arenden (+ gateway och bff): http://localhost:4000/arenden/
 ```
 
-Lokalt fungerar start-appens dev-server som gateway: `apps/start/proxy.conf.json` skickar `/arenden` till 4201 och `/rapporter` till 4202. Därför delar allt origin, precis som i drift. Varje apps dev-server proxar dessutom `/meny` till `backend-for-frontend` på 4300, så menyn fungerar även när en app körs fristående. Är `backend-for-frontend` nere visar menyn bara länken till Start.
+Lokalt surfar du alltid via `tools/dev-gateway` på 4000. Den routar som nginx-gatewayn i drift: `/bff/` till 4300, `/arenden/` till 4201, `/rapporter/` till 4202 och allt annat till `start` på 4200. Därför delar alla appar origin, precis som i drift, så länkar mellan appar och vald enhet i `localStorage` fungerar. En app som inte är igång ger gatewayns felsida, övriga fungerar. Varje apps dev-server proxar dessutom `/bff` till 4300, så en app på sin egen port (t.ex. 4201) får också menyn, men länkar till andra appar fungerar bara via gatewayn.
 
 Kör som i drift, med separata containrar bakom gatewayn:
 
@@ -65,13 +67,13 @@ template: `<mfe-sidlayout><router-outlet /></mfe-sidlayout>`
 
 `href` är alltid den fullständiga adressen. Mittenklick, ctrl/cmd-klick och "öppna i ny flik" fungerar därför i båda fallen. Inom en app går det lika bra att använda vanlig `routerLink`.
 
-**Menyn** hämtas från `/meny` vid runtime. Den serveras av `backend-for-frontend`, en liten Node-tjänst utan beroenden som läser `apps/backend-for-frontend/meny.json`. Biblioteket äger bara utseende och logik. En ny menypost kräver alltså bara en deploy av `backend-for-frontend`, inte av alla appar. Den aktiva posten är den med längst matchande sökväg i aktuell app. `/arenden/nya` markerar därför "Nya ärenden" och inte "Ärenden".
+**Menyn** hämtas från `/bff/api/1.0/meny` vid runtime. Den serveras av `backend-for-frontend`, en liten Node-tjänst utan beroenden som läser `apps/backend-for-frontend/meny.json`. Biblioteket äger bara utseende och logik. En ny menypost kräver alltså bara en deploy av `backend-for-frontend`, inte av alla appar. Den aktiva posten är den med längst matchande sökväg i aktuell app. `/arenden/nya` markerar därför "Nya ärenden" och inte "Ärenden".
 
 **Delat tillstånd** (vald enhet) ligger i `localStorage`, eftersom ett appbyte är en full sidladdning. Det fungerar för att alla appar delar origin bakom gatewayn. Andra öppna flikar hålls i synk via `storage`-eventet.
 
 **Övergångar**: `@view-transition { navigation: auto; }` i tokens ger en mjuk övergång mellan appar. Sidhuvud och meny har egna `view-transition-name` och står still medan innehållet tonas över. I dev-läge loggar Chromium att övergången avbryts, eftersom Vite laddar stilarna efter sidan. Det påverkar inte produktionsbygget.
 
-**När en app är nere** visar gatewayn `deploy/gateway/otillganglig.html` i stället för en 502. Övriga appar påverkas inte. **Om `/meny` inte går att hämta** visar menyn bara Start och ett meddelande.
+**När en app är nere** visar gatewayn `deploy/gateway/otillganglig.html` i stället för en 502. Övriga appar påverkas inte. **Om menyn inte går att hämta** visar menyn bara Start och ett meddelande.
 
 ## Oberoende deploy
 
@@ -105,10 +107,10 @@ Varje app kan deployas som egen container (`deploy/app/Dockerfile`) eller som st
 
 ## Regler som håller isär teamen
 
-1. **Sökvägskonventionen är kontraktet.** `start` på `/`, alla andra på `/<appnamn>/`. Den finns på tre ställen som måste hållas i synk: `appBas()`, gatewayn och `baseHref`.
+1. **Sökvägskonventionen är kontraktet.** `start` på `/`, alla andra på `/<appnamn>/`. Den finns på fyra ställen som måste hållas i synk: `appBas()`, gatewayn, dev-gatewayn och `baseHref`.
 2. **Länka till andra appar med `mfeLank`**, aldrig med hårdkodade `href`.
 3. **Layoutändringar ska vara bakåtkompatibla.** Så länge alla appar inte har deployats om visas olika versioner av headern i olika appar.
-4. **`index.html` och `/meny` får aldrig cachas.** Se `deploy/app/default.conf.template` och `apps/backend-for-frontend/server.mjs`.
+4. **`index.html` och menyn får aldrig cachas.** Se `deploy/app/default.conf.template` och `apps/backend-for-frontend/server.mjs`.
 5. **Delat tillstånd som måste överleva ett appbyte** ska ligga i URL, cookie, `localStorage` eller backend, aldrig bara i minnet.
 
 ## Lägga till en ny app
@@ -121,8 +123,8 @@ Sedan:
 
 - Sätt `baseHref: "/fakturor/"` och en port i `project.json`.
 - Använd samma `app.ts`, `app.config.ts` och `styles.scss` som de andra apparna, med `provideSidlayout('fakturor')`.
-- Lägg till en rad i `apps/start/proxy.conf.json` och en `location` i gatewayn.
-- Ge appen en egen `proxy.conf.json` med `/meny` -> `http://localhost:4300` och peka ut den med `proxyConfig` i `serve`.
+- Lägg till en rutt i `tools/dev-gateway/server.mjs` och en `location` i `deploy/gateway/nginx.conf`.
+- Ge appen en egen `proxy.conf.json` med `/bff` -> `http://localhost:4300` och peka ut den med `proxyConfig` i `serve`.
 - Lägg till menyposten i `apps/backend-for-frontend/meny.json`.
 
 ## Nästa steg utanför PoC:n

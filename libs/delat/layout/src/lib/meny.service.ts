@@ -5,7 +5,7 @@ export type Menypost = AppLank & { etikett: string };
 type Meny = { poster: Menypost[] };
 
 /**
- * Menyns INNEHÅLL hämtas vid runtime från /meny (serveras av backend-for-frontend).
+ * Menyns INNEHÅLL hämtas vid runtime från /bff/api/1.0/meny (serveras av backend-for-frontend).
  * Bara utseende och logik ligger i biblioteket. En ny menypost kräver därför ingen
  * ombyggnad av apparna – bara en ny deploy av backend-for-frontend.
  */
@@ -15,8 +15,8 @@ export class MenyService {
 
   private readonly meny = resource({
     loader: async ({ abortSignal }) => {
-      const svar = await fetch('/meny', { signal: abortSignal, cache: 'no-cache' });
-      if (!svar.ok) throw new Error(`/meny svarade ${svar.status}`);
+      const svar = await fetch('/bff/api/1.0/meny', { signal: abortSignal, cache: 'no-cache' });
+      if (!svar.ok) throw new Error(`meny svarade ${svar.status}`);
       return (await svar.json()) as Meny;
     },
   });

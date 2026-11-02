@@ -1,3 +1,3 @@
 {
-  "/meny": { "target": "http://localhost:4300" }
+  "/bff": { "target": "http://localhost:4300" }
 }

@@ -1,4 +1,5 @@
 // Backend for frontend: tjänster som alla appar behöver, oberoende av att någon app är igång.
+// Alla endpoints ligger under /bff/api/<version>/, så proxy och gateway behöver bara en regel.
 // Nås same-origin via dev-proxyn (proxy.conf.json) eller gatewayn, så ingen CORS behövs.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -9,7 +10,7 @@ const menyFil = new URL('./meny.json', import.meta.url);
 const server = createServer(async (req, res) => {
   const sokvag = (req.url ?? '/').split('?')[0];
 
-  if (req.method === 'GET' && sokvag === '/meny') {
+  if (req.method === 'GET' && sokvag === '/bff/api/1.0/meny') {
     try {
       // Läses vid varje anrop, så en ändrad meny.json syns utan omstart.
       const meny = await readFile(menyFil, 'utf8');

@@ -1,5 +1,3 @@
 {
-  "/meny": { "target": "http://localhost:4300" },
-  "/arenden": { "target": "http://localhost:4201", "ws": true, "changeOrigin": true },
-  "/rapporter": { "target": "http://localhost:4202", "ws": true, "changeOrigin": true }
+  "/bff": { "target": "http://localhost:4300" }
 }
