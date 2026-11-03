@@ -19,10 +19,10 @@ import { ENHETER, SessionService } from './session.service';
   template: `
     <a class="hoppa" href="#innehall">Hoppa till innehåll</a>
     <header class="sidhuvud">
-      @if (arIntern(start)) {
+      @if (arIntern(hem)) {
         <a class="varumarke" routerLink="/">Verksamhetsportal</a>
       } @else {
-        <a class="varumarke" [href]="appUrl(start)">Verksamhetsportal</a>
+        <a class="varumarke" [href]="appUrl(hem)">Verksamhetsportal</a>
       }
       <label class="enhet">
         <span>Enhet</span>
@@ -66,7 +66,7 @@ export class Sidlayout {
   protected readonly session = inject(SessionService);
   protected readonly meny = inject(MenyService);
   protected readonly enheter = ENHETER;
-  protected readonly start: AppLank = { app: 'start' };
+  protected readonly hem: AppLank = { app: 'huvudapplikation' };
   protected readonly appUrl = appUrl;
 
   private readonly aktuellApp = inject(AKTUELL_APP);

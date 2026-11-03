@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 
 const port = Number(process.env.PORT ?? 4000);
 
-// Sökvägsprefix -> dev-server. Första träff vinner, så '/' (start) måste ligga sist.
+// Sökvägsprefix -> dev-server. Första träff vinner, så '/' (huvudapplikationen) måste ligga sist.
 const rutter = [
   { prefix: '/bff/', mal: 4300 },
   { prefix: '/arenden/', mal: 4201 },

@@ -1,0 +1,20 @@
+{
+  "name": "@mfe-layout-poc/delat-layout",
+  "version": "0.1.0",
+  "description": "Gemensam sidram för alla appar: sidhuvud, meny, enhetsväljare och designtokens.",
+  "peerDependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "rxjs": "^7.8.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "exports": {
+    "./stil/tokens": {
+      "sass": "./stil/_tokens.scss"
+    }
+  },
+  "sideEffects": false
+}

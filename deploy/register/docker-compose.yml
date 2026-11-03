@@ -1,0 +1,12 @@
+# Lokalt npm-register (Verdaccio) som simulerar Azure Artifacts / GitHub Packages.
+#   docker compose -f deploy/register/docker-compose.yml up -d   # http://localhost:4873
+# @mfe-layout-poc/* publiceras hit (npm run publicera:layout), allt annat hämtas vidare från npmjs.org.
+services:
+  register:
+    image: verdaccio/verdaccio:6
+    ports: ['4873:4873']
+    volumes:
+      - ./config.yaml:/verdaccio/conf/config.yaml:ro
+      - paket:/verdaccio/storage
+volumes:
+  paket:

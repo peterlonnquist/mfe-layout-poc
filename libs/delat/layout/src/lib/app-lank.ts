@@ -7,11 +7,11 @@ export const AKTUELL_APP = new InjectionToken<string>('AKTUELL_APP');
 export type AppLank = { app: string; sokvag?: string };
 
 /**
- * Konvention: appen 'start' ligger på /, alla andra på /<appnamn>/.
+ * Konvention: appen 'huvudapplikation' ligger på /, alla andra på /<appnamn>/.
  * Samma konvention gäller i gatewayn (nginx) och i dev-gatewayn.
  */
 export function appBas(app: string): string {
-  return app === 'start' ? '/' : `/${app}/`;
+  return app === 'huvudapplikation' ? '/' : `/${app}/`;
 }
 
 /**

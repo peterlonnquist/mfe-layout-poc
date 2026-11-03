@@ -21,7 +21,7 @@ export class MenyService {
   readonly poster = computed<Menypost[]>(() =>
     this.meny.hasValue()
       ? this.meny.value().poster
-      : [{ etikett: 'Start', app: 'start', sokvag: '' }],
+      : [{ etikett: 'Start', app: 'huvudapplikation', sokvag: '' }],
   );
 
   readonly laddar = this.meny.isLoading;

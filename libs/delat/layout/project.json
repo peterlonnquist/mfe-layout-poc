@@ -3,10 +3,29 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/delat/layout/src",
   "prefix": "lib",
+  "projectType": "library",
   "tags": [
     "typ:delat"
   ],
-  "projectType": "library",
-  "// targets": "to see all targets run: nx show project delat-layout --web",
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "@angular/build:ng-packagr",
+      "outputs": [
+        "{workspaceRoot}/dist/libs/delat/layout"
+      ],
+      "options": {
+        "project": "libs/delat/layout/ng-package.json",
+        "tsConfig": "libs/delat/layout/tsconfig.lib.prod.json"
+      }
+    },
+    "publicera": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "command": "npm publish ./dist/libs/delat/layout --registry http://localhost:4873 --//localhost:4873/:_authToken=lokal"
+      }
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { SessionService, appUrl } from '@mfe-layout-poc/delat/layout';
+import { SessionService, appUrl } from '@mfe-layout-poc/delat-layout';
 
 @Component({
   selector: 'app-start',

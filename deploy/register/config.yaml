@@ -1,0 +1,23 @@
+# Verdaccio-konfiguration för PoC:n. Bara för lokalt bruk: vem som helst får publicera.
+storage: /verdaccio/storage/data
+
+auth:
+  htpasswd:
+    file: /verdaccio/storage/htpasswd
+    max_users: -1
+
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+
+packages:
+  # Våra egna paket finns bara här och hämtas aldrig från npmjs.org.
+  '@mfe-layout-poc/*':
+    access: $all
+    publish: $all
+    unpublish: $all
+  '**':
+    access: $all
+    proxy: npmjs
+
+log: { type: stdout, format: pretty, level: warn }

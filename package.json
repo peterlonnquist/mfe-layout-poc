@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx run-many -t serve -p dev-gateway backend-for-frontend start arenden rapporter --parallel=5",
-    "start:arenden": "nx run-many -t serve -p dev-gateway backend-for-frontend arenden",
-    "start:rapporter": "nx run-many -t serve -p dev-gateway backend-for-frontend rapporter",
+    "start": "nx run-many -t serve -p dev-gateway backend-for-frontend huvudapplikation",
     "start:bff": "nx serve backend-for-frontend",
+    "register": "docker compose -f deploy/register/docker-compose.yml up -d",
+    "publicera:layout": "nx run delat-layout:publicera",
     "build": "nx run-many -t build",
     "build:affected": "nx affected -t build",
     "affected:appar": "nx show projects --affected --type app"
@@ -38,6 +38,7 @@
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
     "@types/node": "^24.0.0",
+    "ng-packagr": "~22.2.0",
     "nx": "24.0.0",
     "prettier": "^3.8.1",
     "tslib": "^2.3.0",

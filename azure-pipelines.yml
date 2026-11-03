@@ -1,6 +1,8 @@
 # Bygger bara det som påverkats av ändringen och deployar varje påverkad app för sig.
-#   Ändring i apps/arenden          -> bara arenden byggs och deployas.
-#   Ändring i libs/delat/layout/**  -> ALLA appar byggs och deployas (layouten är inbyggd i varje app).
+#   Ändring i apps/huvudapplikation/**     -> bara huvudapplikation.
+#   Ändring i libs/delat/layout/**         -> huvudapplikation (använder biblioteket från källkoden).
+#                                             arenden och rapporter ligger i egna repon och tar in
+#                                             en ny version av npm-paketet när de själva vill.
 #   Ändring i apps/backend-for-frontend/** -> bara backend-for-frontend (menyn läses vid runtime).
 trigger:
   branches: { include: [main] }
@@ -31,13 +33,13 @@ stages:
             displayName: Bygg påverkade projekt
           - script: |
               APPAR=$(npx nx show projects --affected --type app --base=$(NX_BASE) --head=HEAD --json)
-              # Konvention: start ligger på /, övriga på /<app>/ (samma som appBas() i layoutbiblioteket).
+              # Konvention: huvudapplikation ligger på /, övriga på /<app>/ (samma som appBas() i layoutbiblioteket).
               # backend-for-frontend är en Node-tjänst utan bas-sökväg och med egen Dockerfile.
               MATRIS=$(node -e '
                 const a = JSON.parse(process.argv[1]);
                 const jobb = (x) => x === "backend-for-frontend"
                   ? { APP: x, BAS: "", DOCKERFILE: "deploy/backend-for-frontend/Dockerfile" }
-                  : { APP: x, BAS: x === "start" ? "/" : `/${x}/`, DOCKERFILE: "deploy/app/Dockerfile" };
+                  : { APP: x, BAS: x === "huvudapplikation" ? "/" : `/${x}/`, DOCKERFILE: "deploy/app/Dockerfile" };
                 console.log(JSON.stringify(Object.fromEntries(a.map(x => [x, jobb(x)]))));
               ' "$APPAR")
               echo "Påverkade appar: $APPAR"
